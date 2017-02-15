@@ -182,8 +182,15 @@ melted.prototype.sendClip = function(clip, command) {
 
     logger.debug(this.uuid + " - Creating playlist xml object for file " + filename);
     var pl = new melted_xml.Playlist;
-    pl.entry({producer: video});
+
+    // filtro webvfx
+    var objFilter = new melted_xml.Filter["WebVFX"]({
+      resource: "http://localhost:3100/filter"
+    });
+
+    pl.entry({producer: video, filters:[objFilter]});
     xml.push(pl);
+    // ------------
 
     logger.debug(this.uuid + " - Creating track xml object for file " + filename);
     var track = new melted_xml.Multitrack.Track(pl);
