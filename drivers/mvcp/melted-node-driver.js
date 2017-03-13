@@ -16,12 +16,14 @@ function melted(host, port, timeout) {
     this.uuid = uuid.v4();
     logger.debug(this.uuid + " - Creating server instance [" + host + ":" + port + "]");
     this.mlt = new melted_node(host, port, melted_log, timeout);
+  //this.mlt2 = new melted_node(host, 5251, melted_log, timeout);
     this.commandQueue = Q.resolve();
     logger.debug(this.uuid + " - Server instance created [" + this.mlt.host + ":" + this.mlt.port + "]");
 }
 
 melted.prototype._sendCommand = function(command) {
     logger.debug(this.uuid + " - Sending command: " + command);
+  //this.mlt2.sendCommand(command);
     return this.mlt.sendCommand(command);
 };
 
@@ -161,6 +163,7 @@ melted.prototype.initServer = function() {
 melted.prototype.stopServer = function() {
     logger.info(this.uuid + " - Disconnecting from server instance [" + this.mlt.host + ":" + this.mlt.port + "]");
 
+  //this.mlt2.disconnect();
     return this.mlt.disconnect();
 };
 
@@ -184,13 +187,18 @@ melted.prototype.sendClip = function(clip, command) {
     var pl = new melted_xml.Playlist;
 
     // filtro webvfx
-    var objFilter = new melted_xml.Filter["WebVFX"]({
-      resource: "http://localhost:3100/filter"
-    });
+    if (file == "/media/proc/blank.xml") {
+      pl.entry({producer: video});
+      xml.push(pl);
+    } else {
+      var objFilter = new melted_xml.Filter["WebVFX"]({
+        resource: "http://192.168.0.10:3100/filter"
+      });
 
-    pl.entry({producer: video, filters:[objFilter]});
-    xml.push(pl);
-    // ------------
+      pl.entry({producer: video, filters:[objFilter]});
+      xml.push(pl);
+    }
+     // ------------
 
     logger.debug(this.uuid + " - Creating track xml object for file " + filename);
     var track = new melted_xml.Multitrack.Track(pl);
